@@ -1,7 +1,8 @@
 
-# BDD  behaviour Driven Development
+# BDD  Behaviour Driven Development
     A process to ensure collaboration between 3 amigos : Business , Dev , QA 
-    to have common shared understanding on whats the aceptence 
+    to have common shared understanding on the aceptence criteria 
+    that matter most to the customers
 
 # Project Creation
 
@@ -10,7 +11,7 @@
     2. group id : `com.cydeo`
     3. artifact id : leave it as is
     4. Click finish
-2. create folder sturcture as below
+2. create folder structure as below
     1. under `src/test/java` create below packages
     2. create a package `com.cydeo` ,under this package
         1.  create `utility` package

@@ -1,7 +1,7 @@
 package com.cydeo.pages;
 
-import com.cybertek.utility.BrowserUtil;
-import com.cybertek.utility.Driver;
+import com.cydeo.utility.BrowserUtil;
+import com.cydeo.utility.Driver;
 import com.github.javafaker.Faker;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;

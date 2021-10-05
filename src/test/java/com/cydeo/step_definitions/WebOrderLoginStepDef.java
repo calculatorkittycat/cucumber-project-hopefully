@@ -2,6 +2,7 @@ package com.cydeo.step_definitions;
 
 import com.cydeo.pages.WLoginPage;
 import com.cydeo.utility.Driver;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -42,4 +43,24 @@ public class WebOrderLoginStepDef {
     }
 
 
+    @When("we provide invalid credentials")
+    public void weProvideInvalidCredentials() {
+
+        loginPage.login("bla","bla");
+
+    }
+
+    @Then("we should still be at login page")
+    public void weShouldStillBeAtLoginPage() {
+
+         assertEquals("Web Orders Login", Driver.getDriver().getTitle()) ;
+
+    }
+
+    @And("login error message should be present")
+    public void loginErrorMessageShouldBePresent() {
+
+        assertTrue(   loginPage.loginErrorMsgPresent()  );
+
+    }
 }

@@ -1,5 +1,6 @@
-package com.cydeo.utility;
+package com.cydeo.step_definitions;
 
+import com.cydeo.utility.Driver;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 

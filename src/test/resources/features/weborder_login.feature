@@ -19,3 +19,15 @@ Feature: Web order app login
     Then we should still be at login page
     And login error message should be present
 
+  Scenario: User login with specific credentials
+    # whatever is enclosed inside quotation " " will be send as parameter value
+    # step definition will look like this
+    # @When("user provide username {string} and password {string}")
+    When user provide username "Tester" and password "test"
+    Then we should see all order page
+
+  Scenario: User login with wrong credentials
+
+    When user provide username "BLA" and password "BLA"
+    Then we should still be at login page
+    And login error message should be present

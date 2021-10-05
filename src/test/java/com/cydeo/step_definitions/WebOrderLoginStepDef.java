@@ -63,4 +63,12 @@ public class WebOrderLoginStepDef {
         assertTrue(   loginPage.loginErrorMsgPresent()  );
 
     }
+
+    @When("user provide username {string} and password {string}")
+    public void userProvideUsernameAndPassword(String username, String password) {
+        // username = "whatever provided from scenario step"
+        // password = "whatever provided from scenario step"
+        loginPage.login( username, password );
+
+    }
 }

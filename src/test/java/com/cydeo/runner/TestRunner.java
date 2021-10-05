@@ -6,8 +6,9 @@ package com.cydeo.runner;
 // where are the step definitions
 //  glue = "com/cydeo/step_definitions"
 // do we want to just generate missing step definitions
-    //dryRun=true will run the test without failing for missing steps
+    //dryRun=true will run the test without running all scenario for missing steps
     // so you can copy all the missing steps if there is any
+    // it's like a quick scan of all your feature steps has step definitions or not
 
 // do we want to get json , html report
 // do we want to filter the test run according to certain tags
@@ -18,6 +19,9 @@ import org.junit.runner.RunWith;
 
 @RunWith(Cucumber.class)
 @CucumberOptions(  features = "src/test/resources/features" ,
-                   glue = "com/cydeo/step_definitions"    )
+                   glue = "com/cydeo/step_definitions" ,
+                   dryRun = false
+                   //, tags = "@ui"
+                )
 public class TestRunner {
 }

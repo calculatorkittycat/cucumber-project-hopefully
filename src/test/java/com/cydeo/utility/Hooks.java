@@ -16,6 +16,8 @@ public class Hooks {
         System.out.println("THIS IS FROM @Before inside hooks class");
         // set up implicit wait or all the browser related set up
         Driver.getDriver().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS) ;
+        // maximize browser here if you wanted
+        Driver.getDriver().manage().window().maximize();
     }
 
     @After

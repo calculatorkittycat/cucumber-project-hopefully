@@ -18,10 +18,11 @@ import io.cucumber.junit.CucumberOptions;
 import org.junit.runner.RunWith;
 
 @RunWith(Cucumber.class)
-@CucumberOptions(  features = "src/test/resources/features" ,
+@CucumberOptions(  features = "src/test/resources/features" , //alternatively "classpath:features"
                    glue = "com/cydeo/step_definitions" ,
+                   plugin = { "html:target/cucumber.html"  } ,
                    dryRun = false
-                   , tags = "@wip"
+//                   , tags = "@wip"
                 )
 public class TestRunner {
 }

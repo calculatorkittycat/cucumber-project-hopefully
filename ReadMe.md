@@ -52,7 +52,7 @@ Gherkin is a set of grammar rules that makes plain text structured enough for Cu
 Syntax usually follow this pattern
 
 ```gherkin
-Given some condition is defined 
+Given some condition is defined
 When some actions are taken 
 Then some result should be expected
 ```
@@ -242,7 +242,7 @@ to demonstrate the parametrizing and reusing steps
 
 ## Adding Selenium Related Dependencies and classes
 
-1. add selenium dependency
+- add selenium dependency
 
 ```xml
 <dependency>
@@ -252,7 +252,7 @@ to demonstrate the parametrizing and reusing steps
 </dependency>
 ```
 
-1. add faker dependency
+- add faker dependency
 
 ```xml
 <dependency>
@@ -262,7 +262,7 @@ to demonstrate the parametrizing and reusing steps
 </dependency>
 ```
 
-2. add WebDriverManager Dependency
+- add WebDriverManager Dependency
 
  ```xml
  <dependency>
@@ -587,7 +587,7 @@ It's always empty and use special annotations as below
 - `@cucumberOptions` to define all related configurations
 
 for example :
-- where are the step definitions :
+- where are the feature files :
     - `features = "src/test/resources/features"`
 - where are the step definitions (glue code):
     - `glue = "com/cydeo/step_definitions"`

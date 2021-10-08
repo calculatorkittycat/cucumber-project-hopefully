@@ -3,10 +3,8 @@
 @calculator @non_ui
 Feature: Calculator feature
   As a user,
-  I should be able
-  to use the calculator,
-  de that I can do
-  arithmetic operations.
+  I should be able to use the calculator,
+  so that I can do arithmetic operations.
 
   ## below line is how we add tag to a feature at scenario level
   @addition

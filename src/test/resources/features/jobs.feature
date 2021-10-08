@@ -1,3 +1,4 @@
+@non_ui
 Feature: Getting jobs
   As a student I should be able to get job after learning all good tools
 

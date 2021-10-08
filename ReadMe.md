@@ -262,7 +262,7 @@ to demonstrate the parametrizing and reusing steps
 </dependency>
 ```
 
-- add WebDriverManager Dependency
+2. add WebDriverManager Dependency
 
  ```xml
  <dependency>

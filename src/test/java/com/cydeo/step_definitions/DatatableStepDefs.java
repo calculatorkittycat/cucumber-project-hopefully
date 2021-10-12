@@ -1,5 +1,6 @@
 package com.cydeo.step_definitions;
 
+import com.cydeo.pages.WLoginPage;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -45,14 +46,27 @@ public class DatatableStepDefs {
     public void theyComeToMeWithBelowNoise(Map<String,String> animalNoiseMap) {
         System.out.println("animalNoiseMap = " + animalNoiseMap);
     }
-        // This can be represented by List<List<String>> as well like below
+
+    // This can be represented by List<List<String>> as well like below
 //    @Then("They come to me with below noise")
 //    public void theyComeToMeWithBelowNoise(List< List<String> > animalRowLst) {
 //
 //        System.out.println("animalRowLst = " + animalRowLst);
 //
 //    }
-    
+
+    @When("we provide below credentials")
+    public void weProvideBelowCredentials(Map<String, String> credentialMap) {
+
+        System.out.println("credentialMap = " + credentialMap);
+        String usernameFromTable = credentialMap.get("username");
+        String passwordFromTable = credentialMap.get("password");
+
+        WLoginPage loginPage = new WLoginPage();
+        loginPage.login( usernameFromTable, passwordFromTable  );
+
+
+    }
     
     
 }

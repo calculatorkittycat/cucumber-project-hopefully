@@ -1,3 +1,4 @@
+@ui @library_login
 Feature: Logging into Library app
   As a user
   I should be able to login to library app

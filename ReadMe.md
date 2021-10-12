@@ -2,21 +2,21 @@
 # Automation Framework with Cucumber
 
 1. [BDD  Behaviour Driven Development](#bdd--behaviour-driven-development)
-    1. [Benefit of BDD](#benefit-of-bdd)
-    2. [Gherkin](#gherkin)
-    3. [Step Definitions](#step-definitions)
+   1. [Benefit of BDD](#benefit-of-bdd)
+   2. [Gherkin](#gherkin)
+   3. [Step Definitions](#step-definitions)
 2. [Cucumber Maven Project](#cucumber-maven-project)
-    1. [Setting up project](#setting-up-project)
-    2. [Adding Selenium Related Dependencies and classes](#adding-selenium-related-dependencies-and-classes)
+   1. [Setting up project](#setting-up-project)
+   2. [Adding Selenium Related Dependencies and classes](#adding-selenium-related-dependencies-and-classes)
 3. [Cucumber Java with Selenium](#cucumber-java-with-selenium)
-    1. [First Selenium Scenario](#first-selenium-scenario)
-    2. [Hooks](#hooks)
-    3. [More Scenarios and IntelliJ Step Definition generation](#more-scenarios-and-intellij-step-definition-generation)
-    4. [Using Parameters with Cucumber Expression](#using-parameters-with-cucumber-expression)
-    5. [Using `Background` to reuse `Given` condition](#using-background-to-reuse-given-condition)
-    6. [Cucumber Tags](#cucumber-tags)
-        1. [Tag expressions](#tag-expressions)
-    7. [Creating TestRunner](#creating-testrunner)
+   1. [First Selenium Scenario](#first-selenium-scenario)
+   2. [Hooks](#hooks)
+   3. [More Scenarios and IntelliJ Step Definition generation](#more-scenarios-and-intellij-step-definition-generation)
+   4. [Using Parameters with Cucumber Expression](#using-parameters-with-cucumber-expression)
+   5. [Using `Background` to reuse `Given` condition](#using-background-to-reuse-given-condition)
+   6. [Cucumber Tags](#cucumber-tags)
+       1. [Tag expressions](#tag-expressions)
+   7. [Creating TestRunner](#creating-testrunner)
 
 # BDD  Behaviour Driven Development
 
@@ -183,7 +183,7 @@ Here is another example
         2.  create `pages` package
         3.  create `step_definitions` package
         4.  create `runner` package
-3. create a directory|folder under `src/test`
+3. create a directory(folder) under `src/test`
     1. when asked for the name , select `resources` from dropdown it provided
     2. under resources create a folder `features`
 
@@ -588,19 +588,32 @@ It's always empty and use special annotations as below
 
 for example :
 - where are the feature files :
-    - `features = "src/test/resources/features"`
+  - `features = "src/test/resources/features"`
+  - alternatively `features = "classpath:features"` **SHORTER!**
+    - anything under `src/test/resources` can be referred by `classpath:`
 - where are the step definitions (glue code):
-    - `glue = "com/cydeo/step_definitions"`
+  - `glue = "com/cydeo/step_definitions"`
 - quick check missing step definitions without actually running steps
-    - `dryRun=true`
-        - it will only check missing definition and provide it on console if any
-        - it will save time by giving immediate check instead of wasting time running the whole thing and find out we have missing step definition.
-    - `dryRun=false`
-        - it's the default value and will run all scenarios and error out if missing step definition exists
+  - `dryRun=true`
+      - it will only check missing definition and provide it on console if any
+      - it will save time by giving immediate check instead of wasting time running the whole thing and find out we have missing step definition.
+      - `dryRun=false`
+          - it's the default value and will run all scenarios and error out if missing step definition exists
 - filter using tags
-    - `tags = "@smoke"`
-        - run any feature or scenario that tagged with `@smoke`
-- html reports , json reports and so on
+  - `tags = "@smoke"`
+      - run any feature or scenario that tagged with `@smoke`
+- html reports , json reports , pretty console report and so on with built-in plugins
+  - `plugin = {"html:target/cucumber.html"}` 
+    - This will generate simple html report under target folder with a name `cucumber.html`
+    - ![Viewing_built_in_cucumber_report](https://user-images.githubusercontent.com/59104509/136936129-6e54eeaa-4c50-4e5c-b5c6-e3bdea3f4a71.gif)
+  - `plugin = {"pretty", "html:target/cucumber.html"}`
+    - `pretty` plugin will generate colorful console report
+    - ![console_pretty_report](https://user-images.githubusercontent.com/59104509/136937765-03aac670-c5fa-4554-a6a5-1b074b5429d7.jpg)
+  - `plugin = {"pretty", "html:target/cucumber.html","json:target/cucumber.json}`
+    - This will generate a report in a format known as `json` (Javascript Object notation)
+    - ![viewing_built_in_json_report](https://user-images.githubusercontent.com/59104509/136938657-d6770387-da03-4697-a9fd-cf4fda766d16.gif)
+    - Third party reporting tools can use this report to easily customize the report view with rich ui.
+      - for example,  we will use third party reporting from `masterthought` later using this.
 
 ```java
     package com.cydeo.runner;
@@ -611,7 +624,8 @@ for example :
     @RunWith(Cucumber.class)
     @CucumberOptions(  features = "src/test/resources/features" ,
                        glue = "com/cydeo/step_definitions" ,
-                       dryRun = false,
+                       dryRun = false, 
+                       plugin = {"pretty", "html:target/cucumber.html","json:target/cucumber.json}",
                        tags = "@smoke"
                     )
     public class TestRunner {
@@ -621,5 +635,6 @@ for example :
 ```
 
 If we run above test runner ,
-it will only run the scenarios that tagged with `@smoke` tags. 
+it will only run the scenarios that tagged with `@smoke` tags 
+and generate pretty console report , json report , html report. 
 

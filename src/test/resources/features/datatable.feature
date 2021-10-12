@@ -31,3 +31,11 @@ Feature: Demonstrating the data table feature of cucumber
       | turtle | Hiss |
       | zebra  | Bro  |
 
+  @ui
+  Scenario: Login to weborder app by providing username password in 2 column table
+
+    Given we are at web order login page
+    When we provide below credentials
+      | username | Tester |
+      | password | test   |
+    Then we should see all order page

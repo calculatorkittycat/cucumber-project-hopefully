@@ -25,5 +25,9 @@ Feature: Demonstrating the data table feature of cucumber
       | Tito    |
       | Zemfira |
 
-    Then They come to me.
+    Then They come to me with below noise
+      | horse  | Nai  |
+      | dog    | Woof |
+      | turtle | Hiss |
+      | zebra  | Bro  |
 

@@ -201,14 +201,14 @@ Here is another example
    
     2. `cucumber junit` dependency
    
-    ```xml    
+     ```xml    
         <!-- https://mvnrepository.com/artifact/io.cucumber/cucumber-junit -->
-    <dependency>
-        <groupId>io.cucumber</groupId>
-        <artifactId>cucumber-junit</artifactId>
-        <version>6.11.0</version>
-    </dependency>
-    ```
+      <dependency>
+          <groupId>io.cucumber</groupId>
+          <artifactId>cucumber-junit</artifactId>
+          <version>6.11.0</version>
+      </dependency>
+     ```
    
 5. Add a feature file called `eating_cucumber.feature` under `src/test/resources/feature`
     1. copy the example feature file from homepage
@@ -638,3 +638,45 @@ If we run above test runner ,
 it will only run the scenarios that tagged with `@smoke` tags 
 and generate pretty console report , json report , html report. 
 
+
+## Data tables 
+
+Instead of repeating same steps that have different data,
+we can use table to represent the structure for readability
+
+Data tables from Gherkin can be accessed by using the DataTable object as the last parameter 
+in a step definition. 
+This conversion can be done either by Cucumber or manually.
+
+Depending on the table shape as one of the following collections:
+
+- Table with single column `List<String>`
+    ```gherkin
+   Given I have following animals
+   # if you want it to nicely aligned , Command+Option+L  Control+Alt+L
+      | horse  |
+      | dog    |
+      | turtle |
+      | zebra  |
+    ```
+- Table with first column as column name second column as value `Map<String, String> table`
+    ```gherkin
+    Then They come to me with below noise
+      | horse  | Nai  |
+      | dog    | Woof |
+      | turtle | Hiss |
+      | zebra  | Bro  |
+    ```
+  - `Map<String, String> ` or `List<List<String>>`
+- Table with headers and multiple columns `List<Map<String, TypeGoesHere>> table`
+
+    ```gherkin
+    Given this is the product reference
+      | Product     | Price | Discount |
+      | MyMoney     | 100   | 0.08     |
+      | FamilyAlbum | 80    | 0.15     |
+      | ScreenSaver | 20    | 0.1      |
+    ```
+
+- `Map<String, List<String>> table`
+- `Map<String, Map<String, String>> table`

@@ -67,6 +67,15 @@ public class DatatableStepDefs {
 
 
     }
-    
-    
+
+
+    @Given("this is the product reference")
+    public void thisIsTheProductReference(List<Map<String,Object>> productMapLst) {
+
+        System.out.println("productMapLst = " + productMapLst);
+        for( Map<String,Object> eachRowMap  : productMapLst ){
+            System.out.println("eachRowMap = " + eachRowMap);
+        }
+
+    }
 }

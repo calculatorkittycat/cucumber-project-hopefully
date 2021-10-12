@@ -35,7 +35,7 @@ public class GoogleHomePage {
     public void searchKeyword( String keyword  ){
 
         this.searchBox.sendKeys(  keyword  );
-        this.searchBtn.click();
+        this.searchBtn.submit();
 
     }
 

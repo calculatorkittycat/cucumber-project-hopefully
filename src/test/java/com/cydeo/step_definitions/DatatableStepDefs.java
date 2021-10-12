@@ -43,8 +43,16 @@ public class DatatableStepDefs {
 
     @Then("They come to me with below noise")
     public void theyComeToMeWithBelowNoise(Map<String,String> animalNoiseMap) {
-
         System.out.println("animalNoiseMap = " + animalNoiseMap);
-
     }
+        // This can be represented by List<List<String>> as well like below
+//    @Then("They come to me with below noise")
+//    public void theyComeToMeWithBelowNoise(List< List<String> > animalRowLst) {
+//
+//        System.out.println("animalRowLst = " + animalRowLst);
+//
+//    }
+    
+    
+    
 }

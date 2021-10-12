@@ -39,3 +39,12 @@ Feature: Demonstrating the data table feature of cucumber
       | username | Tester |
       | password | test   |
     Then we should see all order page
+
+  Scenario: Representing table with header and more than 2 columns with list of map
+    # we want to represent each row as a map object with column name as key value as cell value
+    # since we have multiple row , we want to store all row map into List of map
+    Given this is the product reference
+      | Product     | Price | Discount |
+      | MyMoney     | 100   | 0.08     |
+      | FamilyAlbum | 80    | 0.15     |
+      | ScreenSaver | 20    | 0.1      |

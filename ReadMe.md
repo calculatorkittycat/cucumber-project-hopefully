@@ -19,6 +19,9 @@
    7. [Creating TestRunner](#creating-testrunner)
    8. [Data tables](#data-tables)
    9. [Scenario Outline with Example](#scenario-outline-with-example)
+   10. [Adding Screenshot to Failed Scenarios](#adding-screenshot-to-failed-scenarios)
+   11. [Rerunning Failed Scenario](#rerunning-failed-scenario)
+   12. [Using Third-Party HTML Reporter](#using-third-party-html-reporter)
 
 # BDD  Behaviour Driven Development
 
@@ -41,8 +44,8 @@ Here is how typical process look like :
 Teams practicing BDD work together to discover and understand the real business needs behind a user story or feature.
 - They explore the requirement by discussing examples and counter-examples of user and system behaviour with the business.
 - This happens during a workshop often known as the "**Three-Amigos**" meeting
--  The purpose of the Three Amigos workshop is not only to build up a deep shared understanding within the team, but also to uncover areas of uncertainty or incorrect assumptions that would typically only surface much later on.
-- Teams often use techniques such as **Example Mapping** and **Feature Mapping **to facilitate the requirements discovery process.
+- The purpose of the **Three Amigos** workshop is not only to build up a deep shared understanding within the team, but also to uncover areas of uncertainty or incorrect assumptions that would typically only surface much later on.
+- Teams often use techniques such as **Example Mapping** and **Feature Mapping** to facilitate the requirements discovery process.
 
 The concrete examples that are created collaboratively in discovery workshops can be used to automatically verify that the software behaves consistently with these examples.
 
@@ -244,23 +247,13 @@ to demonstrate the parametrizing and reusing steps
 
 ## Adding Selenium Related Dependencies and classes
 
-- add selenium dependency
+1. add selenium dependency
 
 ```xml
 <dependency>
     <groupId>org.seleniumhq.selenium</groupId>
     <artifactId>selenium-java</artifactId>
     <version>3.141.59</version>
-</dependency>
-```
-
-- add faker dependency
-
-```xml
-<dependency>
-    <groupId>com.github.javafaker</groupId>
-    <artifactId>javafaker</artifactId>
-    <version>1.0.2</version>
 </dependency>
 ```
 
@@ -274,9 +267,22 @@ to demonstrate the parametrizing and reusing steps
 </dependency>
 ```
 
+
+- add faker dependency (this is not selenium dependency, we will use it for random data at some point)
+
+```xml
+<dependency>
+    <groupId>com.github.javafaker</groupId>
+    <artifactId>javafaker</artifactId>
+    <version>1.0.2</version>
+</dependency>
+```
+
 2. copy all `utility classes` from previous project under utility package.
 3. copy all `pages` from previous project and place it under pages package.
 4. add `config.properties` file from previous project.
+
+
 
 # Cucumber Java with Selenium
 
@@ -460,7 +466,7 @@ public void userProvideUsernameAndPassword(String username, String password) {
 
 ![parameters_with_cucumber_expression](https://user-images.githubusercontent.com/59104509/136516892-f1a6cdd1-b08d-46bf-9007-56a5673c7be4.jpg)
 
-## Using `Background` to reuse `Given` condition
+## Using **Background** to reuse Given condition
 As we progress in above 4 scenarios,
 We found that all of them repeating the below step in `Given` part
 
@@ -617,23 +623,33 @@ for example :
     - Third party reporting tools can use this report to easily customize the report view with rich ui.
       - for example,  we will use third party reporting from `masterthought` later using this.
 
-```java
-    package com.cydeo.runner;
-    import io.cucumber.junit.Cucumber;
-    import io.cucumber.junit.CucumberOptions;
-    import org.junit.runner.RunWith;
-    
-    @RunWith(Cucumber.class)
-    @CucumberOptions(  features = "src/test/resources/features" ,
-                       glue = "com/cydeo/step_definitions" ,
-                       dryRun = false, 
-                       plugin = {"pretty", "html:target/cucumber.html","json:target/cucumber.json"},
-                       tags = "@smoke"
-                    )
-    public class TestRunner {
-        // NOTHING GOES HERE!
-    }
+- publishing generated built-in html report 
+  - since cucumber version 6.7+ , it can be published to temporary location publicly to share report with others
+    - > It's relatively new service that still in development
+  - It can be done simply adding one more cucumber option as `publish=true`
+  - ![cucumber_html_report_publish](https://user-images.githubusercontent.com/59104509/137245096-d85afdf9-7c09-406d-997a-42f3c48ab8f7.jpg)
+  - Here is the report after clicking on the link 
+  - ![published_cucumber_report](https://user-images.githubusercontent.com/59104509/137245330-0ab46101-bbfe-4a4d-a0f6-390df525414b.jpg)
 
+- storing the list of failed scenario for **rerun** later.(instead of running the whole thing). will talk about this separately in it's own section. 
+
+```java
+  package com.cydeo.runner;
+      import io.cucumber.junit.Cucumber;
+      import io.cucumber.junit.CucumberOptions;
+      import org.junit.runner.RunWith;
+    
+      @RunWith(Cucumber.class)
+      @CucumberOptions(  features = "src/test/resources/features" ,
+                         glue = "com/cydeo/step_definitions" ,
+                         dryRun = false, 
+                         plugin = {"pretty", "html:target/cucumber.html","json:target/cucumber.json"},
+                         publish = true , 
+                         tags = "@smoke"
+                      )
+      public class TestRunner {
+          // NOTHING GOES HERE!
+      }
 ```
 
 If we run above test runner ,
@@ -684,6 +700,7 @@ Depending on the table shape as one of the following collections:
       | ScreenSaver | 20    | 0.1      |
 ```
 > Extras as below 
+
 - Table with no header , 2+ column , first column as header : 
   - `Map<String, List<String>> productMap`
   - `productMap.get("ScreenSaver").get(0)` => 20
@@ -740,8 +757,6 @@ public void weProvideBelowCredentials(Map<String, String> credentialMap) {
 
     WLoginPage loginPage = new WLoginPage();
     loginPage.login( usernameFromTable, passwordFromTable  );
-
-
 }
 ```
 
@@ -1062,4 +1077,189 @@ Here is the missing step definition implementation
         loginPage.login(email, password);
     }
 ```
+
+## Adding Screenshot to Failed Scenarios
+
+We have used hook to run certain codes before and after each scenario 
+using @Before and @After annotation from cucumber on top of methods in [Hooks](src/test/java/com/cydeo/step_definitions/Hooks.java) class. 
+
+And we also used cucumber tags to restrict running of such methods for scenarios with certain tags. 
+
+In our case , it only makes sense to set up and teardown driver if it's a UI test. 
+
+So we have marked our browser related scenarios with `@ui` tag. 
+
+When a scenario fail, only way to find out what fail at this moment is by looking at the log. 
+And yet it would make sense for UI scenarios to 
+have a screenshot of the moment of failure 
+and attached to our html report with proper name.
+
+It brings up two questions as below : 
+- How to take screenshot in selenium (pure selenium functionality) ? 
+- Where to put such screenshot code and how to access scenario information like pass fail and names ? 
+
+Let's start with taking screenshot in selenium using `TakeScreenShot` interface. 
+
+![WebDriver_UML_TakeScreenShot](https://user-images.githubusercontent.com/59104509/137210398-113206a0-3387-4bc8-a06e-c8b7744aab07.jpg)
+
+Just like we used, `JavaScriptExecutor` interface for running javascript, 
+`TakeScreenShot` interface from `import org.openqa.selenium.TakesScreenshot;` 
+has single method called `getScreenshotAs` to save screenshot of current window.
+
+Here is how it works : 
+- get a `TakeScreenShot` reference out of `WebDriver` instance 
+```java
+TakesScreenshot takesScreenshot = (TakesScreenshot) Driver.getDriver();
+```
+- save the file using `getScreenshotAs` method and define `OutputType`.
+- here we are selecting output type as byte array because cucumber report expect byte array later when we attach the screenshot to report.
+```java
+final byte[] screenshot = takesScreenshot.getScreenshotAs(OutputType.BYTES);
+```
+
+Let's now take a look at where we can use this screenshot in code. 
+Logical location will be `@After` hook only if scenario fail.
+
+In all hook methods , we have option to inject a parameter with type of `Scenario` 
+so we can get scenario information like pass fail and name and so on. 
+
+Here is how it looks like : 
+
+```java
+@After(@ui)
+public void tearDown(Scenario scenario){
+
+      //  scenario.isFailed() 
+        //  return true if scenario run failed false if not
+      // scenario.getName() 
+        // reture the name of current scenario
+      // scenario.attach( byteArray, "mediaType", "name of screenshot")
+        // this is the method that accept 3 arguments 
+          //  byteArray represent image
+          //  media type , image/png for picture
+          //  name  :whatever name we define, we will use scenario name
+}
+```
+
+We will take screenshot only when scenario fails, 
+so here is how our final hook `@After(@ui)` method look like 
+
+```java
+@After("@ui")
+public void tearDown(Scenario scenario){
+    System.out.println("THIS IS FROM @After inside hooks class");
+    if(scenario.isFailed()){
+        TakesScreenshot ts = (TakesScreenshot) Driver.getDriver() ;
+        byte[] screenshot = ts.getScreenshotAs(OutputType.BYTES);
+        scenario.attach(screenshot,"image/png",scenario.getName());
+    }
+    Driver.closeBrowser();
+}s
+```
+
+So now if any UI scenario fails, we can view screenshot from the report as below. 
+
+![errorScreenshotInReport](https://user-images.githubusercontent.com/59104509/137213835-e2c5182b-3fdf-44cd-8108-5073ce7d193b.jpg)
+
+## Rerunning Failed Scenario
+
+Sometimes scenarios can fail due to network issue or any unexpected temporary issues to cause scenario fail. 
+
+Sometimes we have failure in code, and we fix the issue by adding new code. 
+
+In both above scenario, it makes sense to just run failed scenarios instead of running entire test suite. 
+
+In order to do that , we will need to know exactly what scenarios failed, 
+so we can use that information for next run. 
+
+And we will need separate runner just for running those failed scenario we captured from above step. 
+
+It's rather simple to capture failed scenario and save it into a text file 
+using cucumber built-in `rerun` plugin as below:
+
+```
+plugin = {"rerun:target/rerun.txt"}
+```
+
+In addition to the plugin list we already have, it will do :  
+1. create a file called `rerun.txt` under target folder
+2. store failed scenario inside the text file, so we can use it in separate failed test runner. 
+
+So next step is creating `FailedTestRunner` class as below 
+
+```java
+@RunWith(Cucumber.class)
+@CucumberOptions(
+        features = "@target/rerun.txt" , //@target/rerun.txt will instruct cucumber to use the content of rerun.txt as features to run
+        glue = "com/cydeo/step_definitions" ,
+        plugin = {"pretty", "html:target/failed_cucumber.html"  } // optionally
+)
+public class FailedTestRunner {
+}
+```
+
+Now we have 2 runners classes
+- one that run any scenario we specified 
+- another that run only failed scenarios. 
+**Neat!**
+
+## Using Third-Party HTML Reporter
+
+We learned to use built-in simple html report plugin and publish it to temporary location. 
+
+There are a lot of third party tools that can take the result of cucumber run 
+and generate much more gradual report with rich statistic and ui. 
+
+Here is the [full list](https://cucumber.io/docs/cucumber/reporting/#third-party-plugins) from the official documentation. 
+
+We will be using first one `masterthought` plugin 
+, and yet we will use [cucumber reporting plugin](https://gitlab.com/jamietanna/cucumber-reporting-plugin) 
+and make it even easier to generate same report using `masterthought` internally with few step below.
+
+Steps : 
+- Add the latest dependency into your `pom.xml` file
+
+```xml
+<dependency>
+  <groupId>me.jvt.cucumber</groupId>
+  <artifactId>reporting-plugin</artifactId>
+  <version>5.3.1</version>
+</dependency>
+```
+
+- As optionally recommended, create a file `cucumber-reporting.properties` under root directory with below content
+
+```properties
+# This will become the report name
+projectName=Cucumber Automation Framework
+# This is optional build number you can add to report
+buildNumber=release 1.0
+```
+
+- Add the plugin into your `TestRunner` class as below 
+
+```java
+@RunWith(Cucumber.class)
+@CucumberOptions(  features = "src/test/resources/features" , //alternatively "classpath:features"
+                   glue = "com/cydeo/step_definitions" ,
+                   plugin = {"pretty", "html:target/cucumber.html",
+                                "json:target/cucumber.json", // this will generate json report
+                                "rerun:target/rerun.txt", 
+                                "me.jvt.cucumber.report.PrettyReports:target" // this is for detailed html report
+                             } ,
+                   dryRun = false
+                   , tags = "@go_home"
+                )
+public class TestRunner {
+}
+```
+
+Now, you can run using the `TestRunner` and expect below after test run: 
+- a new folder called `cucumber-html-reports` will be created
+- it will contain some html files and css, js to support the styling
+
+You can open any of the html file to navigate to the report look as below
+
+
+![viewing_html_report_masterthought](https://user-images.githubusercontent.com/59104509/137251284-741338b5-3c3e-45b1-8905-e8057b67450d.gif)
 

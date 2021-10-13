@@ -16,11 +16,11 @@ Feature: Calculator feature with data
     Examples:
       | num1 | num2 | expectedResult |
       | 3    | 4    | 7              |
-      | 4    | 7    | 1             |
+      | 4    | 7    | 11             |
       | 6    | 11   | 17             |
       | 13   | 4    | 17             |
       | 41   | 7    | 48             |
-      | 60   | 11   | 77             |
+      | 60   | 11   | 71             |
 
 
 #  ## below line is how we add tag to a feature at scenario level

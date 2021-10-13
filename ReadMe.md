@@ -17,6 +17,8 @@
    6. [Cucumber Tags](#cucumber-tags)
        1. [Tag expressions](#tag-expressions)
    7. [Creating TestRunner](#creating-testrunner)
+   8. [Data tables](#data-tables)
+   9. [Scenario Outline with Example](#scenario-outline-with-example)
 
 # BDD  Behaviour Driven Development
 
@@ -625,7 +627,7 @@ for example :
     @CucumberOptions(  features = "src/test/resources/features" ,
                        glue = "com/cydeo/step_definitions" ,
                        dryRun = false, 
-                       plugin = {"pretty", "html:target/cucumber.html","json:target/cucumber.json}",
+                       plugin = {"pretty", "html:target/cucumber.html","json:target/cucumber.json"},
                        tags = "@smoke"
                     )
     public class TestRunner {
@@ -639,44 +641,425 @@ it will only run the scenarios that tagged with `@smoke` tags
 and generate pretty console report , json report , html report. 
 
 
-## Data tables 
+## Data tables
 
 Instead of repeating same steps that have different data,
 we can use table to represent the structure for readability
 
-Data tables from Gherkin can be accessed by using the DataTable object as the last parameter 
+Data tables from Gherkin can be accessed by using the `DataTable` object as the last parameter 
 in a step definition. 
 This conversion can be done either by Cucumber or manually.
 
 Depending on the table shape as one of the following collections:
 
 - Table with single column `List<String>`
-    ```gherkin
+```gherkin
+   Scenario: 
    Given I have following animals
    # if you want it to nicely aligned , Command+Option+L  Control+Alt+L
       | horse  |
       | dog    |
       | turtle |
       | zebra  |
-    ```
-- Table with first column as column name second column as value `Map<String, String> table`
-    ```gherkin
+```
+- Table with first column as column name second column as value 
+  - `Map<String, String> animalNoiseMap` or `List<List<String>> animalAndNoiseList`
+
+```gherkin
     Then They come to me with below noise
       | horse  | Nai  |
       | dog    | Woof |
       | turtle | Hiss |
       | zebra  | Bro  |
-    ```
-  - `Map<String, String> ` or `List<List<String>>`
-- Table with headers and multiple columns `List<Map<String, TypeGoesHere>> table`
+```
 
-    ```gherkin
+- Table with headers and multiple columns : 
+  - `List<Map<String, TypeGoesHere>> productMapList`
+
+```gherkin
     Given this is the product reference
       | Product     | Price | Discount |
       | MyMoney     | 100   | 0.08     |
       | FamilyAlbum | 80    | 0.15     |
       | ScreenSaver | 20    | 0.1      |
-    ```
+```
+> Extras as below 
+- Table with no header , 2+ column , first column as header : 
+  - `Map<String, List<String>> productMap`
+  - `productMap.get("ScreenSaver").get(0)` => 20
 
-- `Map<String, List<String>> table`
-- `Map<String, Map<String, String>> table`
+```gherkin
+    Given this is the product reference
+      | MyMoney     | 100   | 0.08     |
+      | FamilyAlbum | 80    | 0.15     |
+      | ScreenSaver | 20    | 0.1      |
+```
+
+- Table with first column no header , 2+ column has header  
+  - `Map<String, Map<String, String>> groupsMap`
+  - first column as key for the map 
+  - second map hold each column as key and cell as value 
+  - `groupsMap.get("group3").get("heroName")` => `Wonder Woman`
+
+```gherkin
+    Given this is the group leader information
+        |             | firstName | lastName | heroName     |
+        | group1      | Clark     | Kent     | Superman     |
+        | group2      | Bruce     | Wayne    | Batman       |
+        | group3      | Diana     | Prince   | Wonder Woman | 
+        | group4      | Barry     | Allen    | Flash        | 
+```
+  
+Here is the [datatable.feature](src/test/resources/features/datatable.feature) file 
+we used to demonstrate few examples above. 
+
+Here is the step definition [DatatableStepDefs](src/test/java/com/cydeo/step_definitions/DatatableStepDefs.java). 
+
+Here is web order app simple login scenario we practiced to use data table.
+
+```gherkin
+  @ui
+    Scenario: Login to weborder app by providing username password in 2 column table
+    
+    Given we are at web order login page
+    When we provide below credentials
+    | username | Tester |
+    | password | test   |
+    Then we should see all order page
+```
+
+And here is the only step definition we do not have for  `When we provide below credentials` step. 
+
+```java
+@When("we provide below credentials")
+public void weProvideBelowCredentials(Map<String, String> credentialMap) {
+
+    System.out.println("credentialMap = " + credentialMap);
+    String usernameFromTable = credentialMap.get("username");
+    String passwordFromTable = credentialMap.get("password");
+
+    WLoginPage loginPage = new WLoginPage();
+    loginPage.login( usernameFromTable, passwordFromTable  );
+
+
+}
+```
+
+Here is web order app simple scenario we practiced to check expected product list 
+
+```gherkin
+  Scenario: User should see all product from the list according to available product
+    Given we are at web order login page
+    And we provide valid credentials
+    When we select "Order" tab from sidebar
+    Then we should see below options in Product dropdown list
+      | MyMoney     |
+      | FamilyAlbum |
+      | ScreenSaver |
+```
+
+We have first 2 steps already from previous classes. 
+
+Here are the two step-definitions missing :
+
+```gherkin
+ When we select "Order" tab from sidebar
+```
+```java
+ @When("we select {string} tab from sidebar")
+    public void weSelectTabFromSidebar(String tabName) {
+        System.out.println("tabName = " + tabName);
+        WCommonArea commonArea = new WCommonArea();
+        // Do not leave it here like this , create a method to select side bar
+        // so we can select according to side bar tabName
+        commonArea.orderTab.click();
+        // it should look something this 
+        // commonArea.selectSideBarTab( tabName ) ;
+    }
+```
+
+```gherkin
+  Then we should see below options in Product dropdown list
+        | MyMoney     |
+        | FamilyAlbum |
+        | ScreenSaver |
+``` 
+
+```java
+    @Then("we should see below options in Product dropdown list")
+    public void weShouldSeeBelowOptionsInProductDropdownList(List<String> expectedOptions) {
+
+        System.out.println("expectedOptions = " + expectedOptions);
+        WOrderPage orderPage = new WOrderPage();
+        // we have created this method to hide all selenium details in page object class
+        List<String> actualOptions = orderPage.getAllProductOptionFromList();
+        // assert these two list are equal
+        // import static org.junit.Assert.assertEquals;
+        assertEquals(expectedOptions, actualOptions) ;
+    }
+```
+
+### More Practice on **Datatable** : 
+
+Task 1 : 
+
+```gherkin
+  Scenario: User should see side bar tabs as expected
+    Given we are at web order login page
+    When we provide valid credentials
+    Then we should see all order page
+    And side bar tabs should be as below 
+      | View all orders   |
+      | View all products |
+      | Order             |
+```
+Task 2 :
+
+```gherkin
+  Scenario: User should see product table as expected
+    Given we are at web order login page
+    And we provide valid credentials
+    When we select "View all products" tab from sidebar
+    And we should see table with below content
+    # for the same of simplicity below table is modified to match exactly to actual table
+        | Product     | Price | Discount |
+        | MyMoney     | $100  | 8%       |
+        | FamilyAlbum | $80   | 15%      |
+        | ScreenSaver | $20   | 10%      |
+```
+
+Task 3 :
+
+```gherkin
+  Scenario: User should see correct product price generated
+    Given we are at web order login page
+    And we provide valid credentials
+    When we select "Order" tab from sidebar
+    Then we should see three section as below
+        |Product Information|
+        |Address Information|
+        |Payment Information|
+    And select each product from dropdown should change the unit price accordingly
+        | ScreenSaver | 20   |
+        | MyMoney     | 100  |
+        | FamilyAlbum | 80   | 
+      # you need to loop to select each item and assert unit price box
+```
+
+Task 4 :
+
+```gherkin
+  Scenario: User should see correct product price and discount generated with total price
+    Given we are at web order login page
+    And we provide valid credentials
+    When we select "Order" tab from sidebar
+    Then selecting blow product and quantity should show correct total and discount
+        | Product     | Price | quantity | Discount | Total |
+        | ScreenSaver | 20    | 5        | 0        | 100   |
+        | MyMoney     | 100   | 5        | 0        | 500   |
+        | FamilyAlbum | 80    | 5        | 0        | 400   |
+        | ScreenSaver | 20    | 10       | 10       | 180   |
+        | MyMoney     | 100   | 10       | 8        | 920   |
+        | FamilyAlbum | 80    | 10       | 15       | 120   |
+      # you need to loop to select each item and assert discount box and total box
+```
+
+Task 5 :
+
+```gherkin
+  Scenario: User should see correct error messages
+    Given we are at web order login page
+    And we provide valid credentials
+    When we select "Order" tab from sidebar
+    And submit the form 
+    Then below error messages should be visible on screen
+        | Quantity must be greater than zero.     | 
+        | Field 'Customer name' cannot be empty. | 
+        | Field 'Street' cannot be empty.     |
+        | Field 'City' cannot be empty. | 
+        | Field 'Zip' cannot be empty. | 
+        | Field 'Card Nr' cannot be empty. |
+        | Field 'Expire date' cannot be empty. |
+```
+
+
+## Scenario Outline with Example
+
+It's common that sometime we run same set of steps against multiple different set of data. 
+
+Few examples we have already seen till now are :
+- logging in with different credentials 
+- adding different numbers in calculator feature
+- searching for different keywords in google 
+- or entering different set of order data in web order app 
+
+Out initial approach is to parameterize the data with cucumber expressions like 
+- `{int}` for number 
+- `{word}` for single word (without quotation)
+- `{string}` for any string enclosed in quotation and so on
+
+For example in this [Google search feature file](src/test/resources/features/google_search.feature) : 
+
+```gherkin
+  Scenario: User search by keyword
+    Given user is at home page
+    When user search for keyword "selenium"
+    Then we should see result page
+    And the title should start with "selenium"
+  # New scenario to search something else
+  Scenario: User search by keyword java
+    Given user is at home page
+    When user search for keyword "java"
+    And the title should start with "java"
+```
+
+If we have to search for more keywords,  then we will have to write more scenarios.  
+even thought we do not need to implement new step definitions. 
+
+Cucumber provide a way to data drive same scenario with different set of data 
+(also known as data driven testing) to remove duplicates and simplify the feature file. 
+
+**Scenario Outline** is used to run same scenario against multiple different set of data.
+
+The data is provided under `Examples :` section as table, and it's **required**. 
+
+We can refer the table data using `<columnName>` syntax in gherkin steps
+these data will be available in your step definitions as method params like before. 
+
+Below is the `Scenario Outline: `[example for Google search ](src/test/resources/features/google_search_data_driven.feature):
+
+```gherkin
+Feature: Google Search Data Driven
+  As a user ,
+  I should be able to search by keyword
+  and get my result for multiple set of data
+  
+## modify this to make it data driven scenario that search for multiple keywords
+  Scenario Outline: User search by keyword "<keyword>"
+    Given user is at home page
+    When user search for keyword "<keyword>"
+    Then the title should start with "<keyword>"
+    Examples:
+      | keyword                        |
+      | cybertruck                     |
+      | selenium                       |
+      | steve jobs                     |
+      | sdet jobs                      |
+      | how to make 100k by being SDET |
+```
+
+When running above Scenario with example , 
+it will run for 5 iteration with different keywords and show in report as below. 
+
+![scenario_outline_example](https://user-images.githubusercontent.com/59104509/137189104-63b268e9-0feb-4107-9223-ba67df92b837.jpg)
+
+
+Here is the [calculator example](src/test/resources/features/calculator_with_data.feature)
+we did with multiple column 
+
+```gherkin
+@calculator @non_ui
+Feature: Calculator feature with data
+  As a user,
+  I should be able to use the calculator,
+  so that I can do arithmetic operations.
+
+  Scenario Outline: Add 2 numbers multiple example
+    Given calculator app is open
+    When I add <num1> with <num2>
+    Then I should get result <expectedResult> displayed
+    Examples:
+      | num1 | num2 | expectedResult |
+      | 3    | 4    | 7              |
+      | 4    | 7    | 1              |
+      | 6    | 11   | 17             |
+      | 13   | 4    | 17             |
+      | 41   | 7    | 48             |
+      | 60   | 11   | 71             |
+```
+
+Above scenario outline will run for 6 iteration with different set of data. 
+data can be referred as `<columnName>` as mentioned above. 
+
+Here is the report with failure included. 
+
+![scenario_outline_with_example_failure](https://user-images.githubusercontent.com/59104509/137190023-f58e212d-9930-42ed-91be-5a12658b14d6.jpg)
+
+Here is the library [library app login feature](src/test/resources/features/library_login.feature) we practiced : 
+
+```gherkin
+@ui @library_login
+Feature: Logging into Library app
+  As a user
+  I should be able to login to library app
+
+  Scenario Outline: Login with valid credentials
+
+    Given user is at library login page
+    When user use username "<email>" and passcode "<password>"
+    Then user should be at dashboard page
+    Examples:
+      | email               | password  |
+      | student42@library   | Sdet2022* |
+      | student43@library   | Sdet2022* |
+      | student44@library   | Sdet2022* |
+      | librarian54@library | Sdet2022* |
+      | librarian15@library | Sdet2022* |
+```
+
+Above scenario outline will run for 5 iteration with different set of data.
+data can be referred as `<columnName>` as mentioned above.
+
+![scenario_outline_example2](https://user-images.githubusercontent.com/59104509/137190758-8c6d7240-a03f-45c9-840d-2fc00ec7865e.jpg)
+
+**It's possible to use data table and scenario outline together if it's needed.** 
+
+Be sure to understand that table goes under `Example:` for running multiple iteration of tests. 
+and data table are only for single(current) iteration.
+
+```gherkin
+@ui @library_login
+Feature: Logging into Library app
+  As a user
+  I should be able to login to library app
+
+  Scenario Outline: Login with valid credentials
+
+    Given user is at library login page
+#    When user use username "<email>" and passcode "<password>"
+    # implement this new step with parameter Map<String,String>
+    When we enter valid credentials as below
+      | username | <email>    |
+      | passcode | <password> |
+    Then user should be at dashboard page
+    Examples:
+      | email               | password  |
+      | student42@library   | Sdet2022* |
+      | student43@library   | Sdet2022* |
+      | student44@library   | Sdet2022* |
+      | librarian54@library | Sdet2022* |
+      | librarian15@library | Sdet2022* |
+```
+
+First table is a data table and first column is serving as header 
+and can be easily converted to `Map<String,String>`
+
+Second table is example table that run for multiple iteration of scenario for each row of data. 
+
+First table is filling up second column data using the `Example` table of scenario outline using `<columnName>` syntax.
+So each iteration the data table will have different credentials value.
+
+![scenario_outline_data_table_together](https://user-images.githubusercontent.com/59104509/137199906-207071f7-82ed-45bb-9bf9-a15f8f094781.jpg)
+
+
+Here is the missing step definition implementation 
+
+```java
+    @When("we enter valid credentials as below")
+    public void weEnterValidCredentialsAsBelow(Map<String,String> credentialMap) {
+        String email    = credentialMap.get("username");
+        String password = credentialMap.get("passcode");
+        loginPage.login(email, password);
+    }
+```
+

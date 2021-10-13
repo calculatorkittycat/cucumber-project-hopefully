@@ -22,4 +22,4 @@ Feature: Calculator feature
   Scenario: Add 2 numbers another example2
     Given calculator app is open
     When I add 51 with 42
-    Then I should get result 9 displayed
+    Then I should get result 93 displayed

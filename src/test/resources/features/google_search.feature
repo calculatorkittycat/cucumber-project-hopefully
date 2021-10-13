@@ -8,7 +8,7 @@ Feature: Google Search
   Background:
     Given user is at home page
 
-  @wip
+
   Scenario: User search by keyword
 #    Given user is at home page
     When user search for keyword "selenium"
@@ -16,7 +16,7 @@ Feature: Google Search
     And the title should start with "selenium"
 
   # New scenario to search something else
-  @wip
+
   Scenario: User search by keyword java
 #    Given user is at home page
     When user search for keyword "java"

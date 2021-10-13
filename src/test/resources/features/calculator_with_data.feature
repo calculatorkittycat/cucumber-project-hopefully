@@ -4,7 +4,7 @@ Feature: Calculator feature with data
   I should be able to use the calculator,
   so that I can do arithmetic operations.
 
-  @wip2
+
     # Scenario Outline is used to run same scenario against multiple different set of data
     # the data is provided under Examples: section as table and it's required
     # you can refer the table data using <columnName> in your steps

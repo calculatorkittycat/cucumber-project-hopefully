@@ -32,5 +32,23 @@ public class EatStepDef {
 
     }
 
+    @Given("there are {int} cucumbers")
+    public void there_are_cucumbers(Integer startingCount) {
+
+        System.out.println("startingCount = " + startingCount);
+
+    }
+    @When("I eat {int} cucumbers")
+    public void i_eat_cucumbers(Integer ateCount) {
+        System.out.println("ateCount = " + ateCount);
+    }
+    @Then("I should have {int} cucumbers")
+    public void i_should_have_cucumbers(Integer leftCount) {
+
+        System.out.println("leftCount = " + leftCount);
+
+    }
+
+
 
 }

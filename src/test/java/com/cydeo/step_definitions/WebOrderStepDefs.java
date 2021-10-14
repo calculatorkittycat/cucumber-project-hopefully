@@ -57,23 +57,40 @@ public class WebOrderStepDefs {
 
         System.out.println("productMapLst = " + productMapLst);
 
+        // how to get first map
+        Map<String,String> expectedFirstRowMap = productMapLst.get(0) ;
+
         WAllProductPage allProductPage = new WAllProductPage();
 
-        // get expected headers :
-        Set<String> headerSet = productMapLst.get(0).keySet() ;
-        System.out.println("headerSet = " + headerSet);
+        System.out.println("allProductPage.getRowMapFromWebTable() = "
+                + allProductPage.getRowMapFromWebTable());
 
-        // get actual header :
-        List<String> actualHeaders = allProductPage.getAllHeaderText();
-        System.out.println("actualHeaders = " + actualHeaders);
+        Map<String,String> actualFirstRowMap = allProductPage.getRowMapFromWebTable() ;
 
-        // check the size is the same
-        assertEquals(headerSet.size() , actualHeaders.size() );
+        // assert two maps are equal
+        assertEquals(  expectedFirstRowMap , actualFirstRowMap );
 
-        // list to set equality check will not work
-        // so we need to turn the set into list
-        List<String> expectedHeaders = new ArrayList<>( headerSet );
-        assertEquals(expectedHeaders, actualHeaders);
+
+        // assert the first row match from datatable and web table
+
+
+
+
+//        // get expected headers :
+//        Set<String> headerSet = productMapLst.get(0).keySet() ;
+//        System.out.println("headerSet = " + headerSet);
+//
+//        // get actual header :
+//        List<String> actualHeaders = allProductPage.getAllHeaderText();
+//        System.out.println("actualHeaders = " + actualHeaders);
+//
+//        // check the size is the same
+//        assertEquals(headerSet.size() , actualHeaders.size() );
+//
+//        // list to set equality check will not work
+//        // so we need to turn the set into list
+//        List<String> expectedHeaders = new ArrayList<>( headerSet );
+//        assertEquals(expectedHeaders, actualHeaders);
 
 
     }

@@ -1126,7 +1126,7 @@ so we can get scenario information like pass fail and name and so on.
 Here is how it looks like : 
 
 ```java
-@After(@ui)
+@After("@ui")
 public void tearDown(Scenario scenario){
 
       //  scenario.isFailed() 
@@ -1223,7 +1223,7 @@ Steps :
 <dependency>
   <groupId>me.jvt.cucumber</groupId>
   <artifactId>reporting-plugin</artifactId>
-  <version>5.3.1</version>
+  <version>5.3.0</version>
 </dependency>
 ```
 

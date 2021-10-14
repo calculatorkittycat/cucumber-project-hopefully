@@ -1,3 +1,4 @@
+@ui
 Feature:  Doing homework
 
   As a student

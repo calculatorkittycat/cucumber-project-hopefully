@@ -48,3 +48,8 @@ Feature: Demonstrating the data table feature of cucumber
       | MyMoney     | 100   | 0.08     |
       | FamilyAlbum | 80    | 0.15     |
       | ScreenSaver | 20    | 0.1      |
+
+    And I have another product reference without header
+      | MyMoney     | 100   | 0.08     |
+      | FamilyAlbum | 80    | 0.15     |
+      | ScreenSaver | 20    | 0.1      |

@@ -10,7 +10,7 @@ Feature:  Doing homework
     When we select "View all products" tab from sidebar
     Then we should see table with below content
     # for the sake of simplicity below table is modified to match exactly to actual table
-      | Product     | Price | Discount |
+      | Product name| Price | Discount |
       | MyMoney     | $100  | 8%       |
       | FamilyAlbum | $80   | 15%      |
       | ScreenSaver | $20   | 10%      |

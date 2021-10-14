@@ -11,6 +11,7 @@ import org.openqa.selenium.support.ui.Select;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -58,7 +59,21 @@ public class WebOrderStepDefs {
 
         WAllProductPage allProductPage = new WAllProductPage();
 
+        // get expected headers :
+        Set<String> headerSet = productMapLst.get(0).keySet() ;
+        System.out.println("headerSet = " + headerSet);
 
+        // get actual header :
+        List<String> actualHeaders = allProductPage.getAllHeaderText();
+        System.out.println("actualHeaders = " + actualHeaders);
+
+        // check the size is the same
+        assertEquals(headerSet.size() , actualHeaders.size() );
+
+        // list to set equality check will not work
+        // so we need to turn the set into list
+        List<String> expectedHeaders = new ArrayList<>( headerSet );
+        assertEquals(expectedHeaders, actualHeaders);
 
 
     }

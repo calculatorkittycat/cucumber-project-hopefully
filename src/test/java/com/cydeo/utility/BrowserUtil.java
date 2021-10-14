@@ -2,8 +2,12 @@ package com.cydeo.utility;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BrowserUtil {
 
@@ -55,6 +59,22 @@ public class BrowserUtil {
           }
 
          return result ;
+
+     }
+
+    /**
+     * A utility method to get the texts out of list of web elements
+     * @param lstOfWebElements the target list of weblement
+     * @return the text inside those web element as List<String>
+     */
+     public static List<String> getAllText(List<WebElement> lstOfWebElements ){
+
+         List<String> allTextLst = new ArrayList<>();
+         for (WebElement eachElement : lstOfWebElements) {
+             allTextLst.add(  eachElement.getText()  );
+         }
+
+         return  allTextLst ;
 
      }
 

@@ -77,7 +77,7 @@
 <!--                    <useUnlimitedThreads>true</useUnlimitedThreads>-->
                     <includes>
                         <include>**/*TestRunner.java</include>
-                        <!-- <include>**/*FailedTestRunner.java</include> -->
+<!--                         <include>**/*FailedTestRunner.java</include>-->
                     </includes>
                 </configuration>
 

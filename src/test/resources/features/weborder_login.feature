@@ -20,6 +20,7 @@ Feature: Web order app login
     Then we should still be at login page
     And login error message should be present
 
+    @bla
   Scenario: User login with specific credentials
     # whatever is enclosed inside quotation " " will be send as parameter value
     # step definition will look like this
@@ -27,6 +28,7 @@ Feature: Web order app login
     When user provide username "Tester" and password "test"
     Then we should see all order page
 
+      @bla
   Scenario: User login with wrong credentials
 
     When user provide username "BLA" and password "BLA"

@@ -11,6 +11,7 @@ Feature: Eating too many cucumbers may not be good for you
     When He eats 10 cucumbers
     Then he faints
 
+    @salad
   Scenario Outline: eating
     Given there are <start> cucumbers
     When I eat <eat> cucumbers

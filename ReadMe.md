@@ -22,6 +22,7 @@
    10. [Adding Screenshot to Failed Scenarios](#adding-screenshot-to-failed-scenarios)
    11. [Rerunning Failed Scenario](#rerunning-failed-scenario)
    12. [Using Third-Party HTML Reporter](#using-third-party-html-reporter)
+   13. [Simple Maven Commands](#simple-maven-commands)
 
 # BDD  Behaviour Driven Development
 
@@ -1262,4 +1263,208 @@ You can open any of the html file to navigate to the report look as below
 
 
 ![viewing_html_report_masterthought](https://user-images.githubusercontent.com/59104509/137251284-741338b5-3c3e-45b1-8905-e8057b67450d.gif)
+
+## More About Maven 
+
+Maven is a powerful tool for java project and dependency management. 
+
+We have been primarily using for managing dependencies. 
+
+Maven is a command line tool, and it uses command line commands to control build lifecycle. 
+
+Here is the [full list of lifecycles available](https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html#Build_Lifecycle_Basics)
+
+We only need 2 at this moment as tester. 
+- `clean` 
+  - will remove the target folder , compiled src code and other resources
+- `test`
+  - will gather test resources into `target` folder
+  - will compile source code into `target` folder
+  - will execute compiled tests according to the setting
+
+You can easily execute the commands directly from IntelliJ 
+- right tab ->`maven` -> `lifecycles` -> select `one of the options`
+- double click to run and view result in console. 
+
+If you get warning about `UTF-8` on left side add this to properties section
+
+- ```xml
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+  ```
+
+- when you double-click `test` in maven tab
+   1. It will use a plugin called surefire plugin bundled with maven (usually we want to add our own with latest version)
+   2. Sure fire plugin will look for any classes with name pattern contains   
+   3. `Test`  `Tests` `TestCases` ..
+   4. It's possible to provide much more control over what we want to run by providing configuration options in plugin section of `pom.xml` including parallel run and stuff
+   5. adding plugin will allow you to add more configuration option like
+   - ignoring test failure, so we can run the whole test without stopping for failure
+   - optionally configuring the run order -- alphabetically
+   - instructing which Class you want to include in the run
+   - by default, it will look for all test classes with these pattern `Test`  `Tests` `TestCases` ..
+   - we want to explicitly define run `TestRunner.java`
+   - most importantly instruct maven to run test in parallel
+   - `<parallel>methods</parallel>` run parallel at method level
+   - `<useUnlimitedThreads>true</useUnlimitedThreads>`  to use all available cpu resources
+   - It's possible to run with fixed thread count for example 4 browser at a time
+   - `<threadCount>4</threadCount>`   
+   - `<perCoreThreadCount>false</perCoreThreadCount>` not 4 thread per code but overall 4 browser at a time , this will use less resources that using up all cpu power
+    - Make `Driver` utility class Thread-Safe because we want to make sure each thread get their own browser
+        - think of it as you have multiple cashier in the store and we want to make sure each cashier have their own cash box so not all cashier end up using one cash box
+        - It's like having many fishing rods catching their own fish (@Larisa)
+        - it will ensure browsers in each thread in parallel execution does not interfere with each other
+        - Using `InheritableThreadLocal` class to wrap up `WebDriver` declaration will allow us to make it thread-safe
+            - instead of `private WebDriver obj`  now we do this below
+            - `private InheritableThreadLocal<WebDriver> driverPool = new InheritableThreadLocal<>(); `
+            - (you can call it whatever you want other than driverPool, it's kinda convention)
+                - InheritableThreadLocal will store the object per thread instead of globally
+                - It has 2 methods we care about
+                    - `get()` will return the current object (`WebDriver`) in this thread , return `null` if does not exist
+                    - `set( Object )` will set the current object (`WebDriver`) for this thread
+                    - optionally `remove()` will remove the object from current thread , same as `set( null )`
+            - For `getDriver` method
+                - create new `WebDriver` instance if we don't already have one so it will be as below
+                - if `driverPool.get()==null`  then `driverPool.set( new ChromeDriver())`  and so on
+            - For `closeBrowser` method
+                - close the browser if if we already have browser
+                    - if `driverPool.get()!=null` then `driverPool.get().quit()`
+                - remove the `WebDriver` instance after closing
+                    - `driverPool.set(null)` or `driverPool.remove()`; does the same
+
+
+
+
+
+## Two Steps to achieve Parallel Execution in cucumber
+
+### Add surefire plugin to Pom.xml
+
+Add it in between the line </dependencies> and </project>
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+<!--                This is maven sure fire plugin to run the test according to what you specify-->
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.0.0-M5</version>
+            <configuration>
+                <testFailureIgnore>true</testFailureIgnore>
+                <runOrder>Alphabetical</runOrder>
+                <parallel>methods</parallel>
+                <useUnlimitedThreads>true</useUnlimitedThreads>
+                <includes>
+                    <include>**/*TestRunner.java</include>
+                    <!-- <include>**/*FailedTestRunner.java</include> -->
+                </includes>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+### Thread-safe `Driver` update
+
+```java
+package com.cydeo.utility;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+
+/**
+ * We wanted to have a class with that only return Single object
+ * no matter how many time you asked for object
+ * so we are creating this class with technic we learned from Singleton pattern
+ */
+// THIS IS THREAD SAFE DRIVER TO ENSURE EACH THREAD HAVE THEIR OWN BROWSER
+    // JUST LIKE EACH CASHIER IN THE STORE HAS THEIR OWN CASHBOX THAT DOES NOT INTERFERE WITH EACH OTHER
+public class Driver {
+    // InheritableThreadLocal  --> this is like a container, bag, pool.
+    // in this pool we can have separate objects for each thread
+    // for each thread, in InheritableThreadLocal we can have separate object for that thread
+    // driver class will provide separate webdriver object per thread
+
+    private static InheritableThreadLocal<WebDriver> driverPool = new InheritableThreadLocal<>();
+
+//    private static WebDriver obj ;
+
+    private Driver(){ }
+
+    /**
+     * Return obj with only one WebDriver instance
+     * @return same WebDriver if exists , new one if null
+     */
+    public static WebDriver getDriver(){
+        // read the browser type you want to launch from properties file
+        String browserName = ConfigReader.read("browser") ;
+        // get method from InheritableThreadLocal will check if we have object in this thread or not
+        // if not it will return null
+        if(driverPool.get() == null){
+
+            // according to browser type set up driver correctly
+            switch (browserName ){
+                case "chrome" :
+                    WebDriverManager.chromedriver().setup();
+                    driverPool.set( new ChromeDriver() );
+                    break;
+                case "firefox" :
+                    WebDriverManager.firefoxdriver().setup();
+                    driverPool.set( new FirefoxDriver() ) ;
+                    break;
+                // other browsers omitted
+                default:
+                    driverPool.set(null);   //obj = null ;
+                    System.out.println("UNKNOWN BROWSER TYPE!!! " + browserName);
+            }
+            return driverPool.get() ;
+
+
+
+        }else{
+//            System.out.println("You have it just use existing one");
+            return driverPool.get() ;
+
+        }
+
+    }
+
+    /**
+     * Quitting the browser and setting the value of
+     * WebDriver instance to null because you can re-use already quitted driver
+     */
+    public static void closeBrowser(){
+
+        // check if we have WebDriver instance or not
+        // basically checking if obj is null or not
+        // if not null
+            // quit the browser
+            // make it null , because once quit it can not be used
+        if( driverPool.get() != null ){
+            driverPool.get().quit();
+            // so when ask for it again , it gives us not quited fresh driver
+            driverPool.set(null);        //obj = null ;
+        }
+
+    }
+
+}
+
+```
+
+
+Running maven command line command directly from IntelliJ without local installation. 
+
+From the top right corner second icon , `Run Anything` Option : 
+- `mvn clean`
+- `mvn test`
+- `mvn clean test`
+- `mvn clean test -Dcucumber.filter.tags=@TagYouWantToRun`
+  - This will give us option to provide the tag without changing TestRunner
 
